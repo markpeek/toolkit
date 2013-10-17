@@ -386,55 +386,22 @@ func String(val interface{}) string {
 	return string(buf)
 }
 
-// Lets wait until Go 1.1
-func List(val interface{}) []interface{} {
-	list := []interface{}{}
-
-	if val == nil {
-		return list
-	}
-
-	switch reflect.TypeOf(val).Kind() {
-	case reflect.Slice:
-		vval := reflect.ValueOf(val)
-
-		size := vval.Len()
-		list := make([]interface{}, size)
-		vlist := reflect.ValueOf(list)
-
-		for i := 0; i < size; i++ {
-			vlist.Index(i).Set(vval.Index(i))
-		}
-
-		return list
-	}
-
-	return list
-}
-
-// Lets wait until Go 1.1
 func Map(val interface{}) map[string]interface{} {
-
-	list := map[string]interface{}{}
-
-	if val == nil {
-		return list
-	}
-
 	switch reflect.TypeOf(val).Kind() {
-	case reflect.Map:
-		vval := reflect.ValueOf(val)
-		vlist := reflect.ValueOf(list)
-
-		for _, vkey := range vval.MapKeys() {
-			key := String(vkey.Interface())
-			vlist.SetMapIndex(reflect.ValueOf(key), vval.MapIndex(vkey))
+	case reflect.Struct:
+		// indirect so function works with both structs and pointers to them
+		structVal := reflect.ValueOf(val).Elem()
+		structType := structVal.Type()
+		mapVal := make(map[string]interface{})
+		for i := 0; i < structType.NumField(); i++ {
+			field := structVal.Field(i)
+			if field.CanSet() {
+				mapVal[structType.Field(i).Name] = field.Interface()
+			}
 		}
-
-		return list
+		return mapVal
 	}
-
-	return list
+	return nil
 }
 
 /*
