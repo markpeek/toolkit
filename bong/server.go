@@ -9,7 +9,7 @@ package bong
 
 import (
 	"bufio"
-	"github.com/golang/protobuf"
+	"github.com/golang/protobuf/proto"
 	"errors"
 	"fmt"
 	"io"
